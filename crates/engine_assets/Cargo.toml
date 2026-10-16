@@ -1,0 +1,8 @@
+[package]
+name = "engine_assets"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+engine_core = { path = "../engine_core" }
+image.workspace = true

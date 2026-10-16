@@ -1,0 +1,10 @@
+[package]
+name = "engine_app"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+engine_core = { path = "../engine_core" }
+engine_physics = { path = "../engine_physics" }
+engine_assets = { path = "../engine_assets" }
+eframe.workspace = true
