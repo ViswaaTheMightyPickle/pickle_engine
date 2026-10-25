@@ -1,7 +1,4 @@
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    ops::Not,
-};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const CHUNK_SIZE: i32 = 32;
 pub const CELLS_PER_METRE: f32 = 16.0;
