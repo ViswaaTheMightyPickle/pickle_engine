@@ -195,9 +195,18 @@ impl World {
         self.get(pos) == MaterialId::STONE
     }
 
-    pub fn solid_cells_in_region(&self, min: CellPos, max: CellPos) -> Vec<CellPos>{
-        solid_cells: Vec<CellPos>
-        // TODO: check whether the cell is solid or not!
+    pub fn solid_cells_in_region(&self, min: CellPos, max: CellPos) -> Vec<CellPos> {
+        let mut solid_cells: Vec<CellPos> = Vec::new();
+
+        for y in min.y..=max.y {
+            for x in min.x..=max.x {
+                if self.is_solid(CellPos { x, y }) {
+                    solid_cells.push(CellPos { x, y });
+                }
+            }
+        }
+
+        solid_cells
     }
 
     pub fn check_cell_validity(&self, pos: CellPos) -> CellState {
