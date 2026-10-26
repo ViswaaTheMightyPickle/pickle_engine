@@ -10,6 +10,12 @@ pub struct CellPos {
     pub y: i32,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct PhysicsPos {
+    pub x: f32,
+    pub y: f32,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ChunkPos {
     pub x: i32,
@@ -103,6 +109,40 @@ pub struct CellState {
     pub move_state: [bool; 3],
 }
 
+impl CellPos {
+    pub fn to_physics_coordinates(self) -> PhysicsPos {
+        let phy_x = self.x as f32 / CELLS_PER_METRE;
+        let phy_y = self.y as f32 / CELLS_PER_METRE;
+
+        PhysicsPos {
+            x: (phy_x),
+            y: (phy_y),
+        }
+    }
+
+    pub fn to_physics_center(self) -> PhysicsPos {
+        let phy_x = (self.x as f32 + 0.5) / CELLS_PER_METRE;
+        let phy_y = (self.y as f32 + 0.5) / CELLS_PER_METRE;
+
+        PhysicsPos {
+            x: (phy_x),
+            y: (phy_y),
+        }
+    }
+}
+
+impl PhysicsPos {
+    pub fn to_cell_coordinates(self) -> CellPos {
+        let cell_x = (self.x * CELLS_PER_METRE).floor() as i32;
+        let cell_y = (self.y * CELLS_PER_METRE).floor() as i32;
+
+        CellPos {
+            x: (cell_x),
+            y: (cell_y),
+        }
+    }
+}
+
 impl World {
     pub fn new() -> Self {
         Self {
@@ -118,12 +158,12 @@ impl World {
             .unwrap_or(MaterialId::EMPTY)
     }
 
-    pub fn set(&mut self, pos: CellPos, material: MaterialId) {
-        if self.get(pos) == material {
+    pub fn set(&mut self, pos: CellPos, mat: MaterialId) {
+        if self.get(pos) == mat {
             return;
         }
 
-        if material == MaterialId::EMPTY && !self.chunks.contains_key(&chunk_of(pos)) {
+        if mat == MaterialId::EMPTY && !self.chunks.contains_key(&chunk_of(pos)) {
             return;
         }
 
@@ -131,40 +171,49 @@ impl World {
             .chunks
             .entry(chunk_of(pos))
             .or_insert_with(|| vec![MaterialId::EMPTY; (CHUNK_SIZE * CHUNK_SIZE) as usize]);
-        chunk[local_index(pos)] = material;
+        chunk[local_index(pos)] = mat;
 
         for dx in -1..=1 {
             for dy in -1..=1 {
                 let mut updated_position = pos;
-                updated_position.x += dx * CHUNK_SIZE;
-                updated_position.y += dy * CHUNK_SIZE;
+                updated_position.x += dx;
+                updated_position.y += dy;
                 self.active_chunks.insert(chunk_of(updated_position));
             }
         }
     }
 
-    pub fn is_in_world_boundaries(&self, position: CellPos) -> bool {
-        if position.x > 255 || position.x < 0 || position.y > 255 || position.y < 0 {
+    pub fn is_in_world_boundaries(&self, pos: CellPos) -> bool {
+        if pos.x > 255 || pos.x < 0 || pos.y > 255 || pos.y < 0 {
             return false;
         } else {
             return true;
         }
     }
 
-    pub fn check_cell_validity(&self, position: CellPos) -> CellState {
+    pub fn is_solid(&self, pos: CellPos) -> bool {
+        self.get(pos) == MaterialId::STONE
+    }
+
+    pub fn solid_cells_in_region(&self, min: CellPos, max: CellPos) -> Vec<CellPos>{
+        solid_cells: Vec<CellPos>
+        // TODO: check whether the cell is solid or not!
+    }
+
+    pub fn check_cell_validity(&self, pos: CellPos) -> CellState {
         let below = CellPos {
-            x: position.x,
-            y: position.y + 1,
+            x: pos.x,
+            y: pos.y + 1,
         };
 
         let diagonal_l = CellPos {
-            x: position.x - 1,
-            y: position.y + 1,
+            x: pos.x - 1,
+            y: pos.y + 1,
         };
 
         let diagonal_r = CellPos {
-            x: position.x + 1,
-            y: position.y + 1,
+            x: pos.x + 1,
+            y: pos.y + 1,
         };
 
         let can_move_left =
