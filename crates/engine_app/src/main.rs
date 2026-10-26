@@ -31,8 +31,33 @@ impl eframe::App for EngineApp {
                 "Visible cells: {}",
                 self.world.visible_cells().len()
             ));
-            ui.label("TODO (Gienna): viewport, PNG import, asset placement, eraser.");
-            ui.label("NOTE: physics and powder stepping are not implemented yet.");
+
+            ui.label("Viewport");
+
+            let cell_size = 8.0;
+            let (response, painter) =
+                ui.allocate_painter(ui.available_size(), egui::Sense::hover());
+            let rect = response.rect;
+
+            painter.rect_filled(rect, 0.0, egui::Color32::from_rgb(30, 32, 38));
+
+            for cell in self.world.visible_cells() {
+                let color = if cell.material == MaterialId::SAND {
+                    egui::Color32::from_rgb(230, 190, 90)
+                } else if cell.material == MaterialId::STONE {
+                    egui::Color32::from_rgb(130, 135, 145)
+                } else {
+                    continue;
+                };
+
+                let x = rect.left() + cell.pos.x as f32 * cell_size;
+                let y = rect.top() + cell.pos.y as f32 * cell_size;
+
+                let cell_rect =
+                    egui::Rect::from_min_size(egui::pos2(x, y), egui::vec2(cell_size, cell_size));
+
+                painter.rect_filled(cell_rect, 0.0, color);
+            }
         });
 
         if self.playing {
