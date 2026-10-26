@@ -24,6 +24,9 @@ impl eframe::App for EngineApp {
                 }
                 if ui.button("Place one sand cell").clicked() {
                     self.world.set(CellPos { x: 31, y: 1 }, MaterialId::SAND);
+                    // TODO: Make an interactive system where you can place sand or stone based on mouse
+                    // position being converted into sand sim's coordinate system; and thus be able to place
+                    // and simulate the sand.
                 }
             });
             ui.label(format!("Playing: {}", self.playing));
