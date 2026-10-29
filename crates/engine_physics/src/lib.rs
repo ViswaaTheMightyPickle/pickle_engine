@@ -1,5 +1,5 @@
+use engine_core::{BodyState, ImportedObject, ObjectId, STEP_SECONDS, Transform};
 use rapier2d::prelude::*;
-use engine_core::{BodyState, ImportedObject, ObjectId, Transform};
 
 // Adapter contract: Rapier internals must stay private to this crate.
 // The initial methods are placeholders, not a working physics engine.
@@ -23,8 +23,8 @@ pub struct PhysicsWorld {
 impl PhysicsWorld {
     pub fn new() -> Self {
         let mut integration_parameters = IntegrationParameters::default();
-        //timestep length 60fps, i assume ts is what you mean by 60hz 
-        integration_parameters.dt = 1.0 / 60.0;
+        //timestep length 60fps, i assume ts is what you mean by 60hz
+        integration_parameters.dt = STEP_SECONDS;
         Self {
             rigid_body_set: RigidBodySet::new(),
             collider_set: ColliderSet::new(),
@@ -35,7 +35,7 @@ impl PhysicsWorld {
             narrow_phase: NarrowPhase::new(),
             impulse_joint_set: ImpulseJointSet::new(),
             multibody_joint_set: MultibodyJointSet::new(),
-            soft_body_set:SoftBodySet::new(),
+            soft_body_set: SoftBodySet::new(),
             ccd_solver: CCDSolver::new(),
 
             objects: Vec::new(),
@@ -58,21 +58,20 @@ impl PhysicsWorld {
         let event_handler = ();
 
         self.physics_pipeline.step(
-                gravity.into(),
-                &self.integration_parameters,
-                &mut self.island_manager,
-                &mut self.broad_phase,
-                &mut self.narrow_phase,
-                &mut self.rigid_body_set,
-                &mut self.collider_set,
-                &mut self.impulse_joint_set,
-                &mut self.multibody_joint_set,
-                &mut self.soft_body_set,
-                &mut self.ccd_solver,
-                &physics_hooks,
-                &event_handler,
-            );
-
+            gravity.into(),
+            &self.integration_parameters,
+            &mut self.island_manager,
+            &mut self.broad_phase,
+            &mut self.narrow_phase,
+            &mut self.rigid_body_set,
+            &mut self.collider_set,
+            &mut self.impulse_joint_set,
+            &mut self.multibody_joint_set,
+            &mut self.soft_body_set,
+            &mut self.ccd_solver,
+            &physics_hooks,
+            &event_handler,
+        );
     }
 
     pub fn erase(&mut self, _id: ObjectId, _local_x: u32, _local_y: u32) -> Result<(), String> {

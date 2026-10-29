@@ -12,7 +12,7 @@ The goal is to combine two kinds of simulation in one editor and one executable:
 The first milestone is deliberately small: place an imported object in a scene, let it fall onto terrain, and run a granular material beside it as particles travel across chunk boundaries.
 
 > [!IMPORTANT]
-> Pick(le)Engine is currently a foundation, not a finished or playable engine. The shared interfaces compile and the workspace is tested, but most simulation and editor features are still being implemented.
+> Pick(le)Engine is currently a foundation, not a finished or playable engine. The workspace has tests, but the asset, physics, and editor workflows needed for the first playable milestone are still being implemented.
 
 ## What works today
 
@@ -21,21 +21,21 @@ The first milestone is deliberately small: place an imported object in a scene, 
 - Sparse `32 x 32` world chunks stored in a `BTreeMap`.
 - Correct chunk addressing for positive and negative world coordinates.
 - Reading and writing cells across chunk boundaries.
-- A read-only snapshot of visible world cells for rendering.
-- Stable object IDs and placeholder physics state storage.
+- Sand movement down and diagonally, with active-chunk updates and tests for crossing a positive chunk boundary.
+- A read-only snapshot of visible world cells and a basic viewport that renders sand and stone.
+- A Rapier pipeline with a headless collision test, plus stable object IDs and placeholder physics state storage.
 - A native eframe window with Play/Pause, Reset, and a test button that places one sand cell.
 - Pinned Rapier, eframe, and image dependencies with a reproducible `Cargo.lock`.
-- Passing workspace builds, tests, formatting, and Clippy checks.
 
 ## Current status
 
 | Area | Status | What that means |
 | --- | --- | --- |
-| Core world | Foundation ready | Chunk storage, coordinates, cell access, and snapshots exist. Sand movement is next. |
-| Physics | Interface only | Objects receive stable IDs, but Rapier bodies, gravity, terrain, and colliders are not wired up yet. |
+| Core world | Basic sand simulation | Chunk storage, cell access, snapshots, and sand movement exist. Movement is currently restricted to coordinates `0..=255` on each axis. |
+| Physics | Rapier pipeline scaffold | The pipeline steps in a headless collision test, but spawning imported bodies, syncing transforms, and connecting terrain remain unfinished. |
 | Asset import | Interface only | The importer API exists, but PNG decoding and mask validation are still TODO. |
-| Editor | First window | The app opens and exposes basic controls, but there is no scene viewport or asset-placement workflow yet. |
-| Integration | Not started | The crates compile together; the playable demonstration does not exist yet. |
+| Editor | Basic viewport | Sand and stone cells render; mouse-based placement and imported-object workflows are still missing. |
+| Integration | Partial | The app steps the world and physics pipeline, but the first playable demonstration does not exist yet. |
 
 In short: the skeleton is healthy, the organs are labelled, and now the creature needs to be brought to life.
 
@@ -63,15 +63,15 @@ crates/
 
 Dependencies flow toward `engine_core`. The core crate stays independent of Rapier, eframe, and image-decoder types, while physics internals remain private to `engine_physics`.
 
-## Simulation rules
+## Simulation rules and targets
 
 - **Coordinates:** +X points right and +Y points down.
 - **Chunks:** each chunk contains `32 x 32` cells.
 - **Storage:** cell arrays are row-major.
 - **Scale:** 16 simulation cells equal one metre in the physics world.
-- **Timestep:** simulation advances at a fixed 60 Hz.
+- **Timestep:** the target is fixed 60 Hz. Rapier is configured with a 60 Hz timestep, but the app currently steps on each UI update rather than scheduling fixed-rate updates.
 - **Ownership:** rigid-object material belongs to its object, not the powder grid.
-- **Mutation:** the editor queues commands; simulation systems apply them at step boundaries.
+- **Mutation:** the intended design is for the editor to queue commands for simulation step boundaries; the current app mutates the world directly.
 
 ## Getting started
 
@@ -103,13 +103,16 @@ On Windows, install the MSVC C++ build tools if requested by `rustup`.
 
 ## Near-term roadmap
 
-- [ ] Move sand downward and diagonally without duplicating cells.
-- [ ] Prove sand can cross positive and negative chunk boundaries.
+- [x] Implement downward and diagonal sand movement, with tests for conservation and positive chunk-boundary crossing.
+- [ ] Decide whether sand should move at negative coordinates; current movement is restricted to `0..=255`.
+- [ ] Add mouse-based sand and stone placement in the viewport.
 - [ ] Decode sprite, action-mask, and collision-mask PNGs.
 - [ ] Reject mismatched dimensions, unknown materials, partial alpha, and invalid collision colors.
-- [ ] Spawn a Rapier rigid body with a simple collider.
-- [ ] Add terrain and verify that a falling body comes to rest.
-- [ ] Render world cells and physics snapshots in the editor.
+- [x] Step Rapier in a headless test with a body and floor collider.
+- [ ] Spawn imported objects as Rapier bodies, build colliders, and sync their transforms.
+- [ ] Connect world terrain to physics and verify that a falling object comes to rest.
+- [x] Render world cells in the editor viewport.
+- [ ] Render physics objects in the editor and schedule simulation at a fixed timestep.
 - [ ] Queue placement and reset commands through the shared contract.
 - [ ] Deliver one reproducible integrated demo.
 
