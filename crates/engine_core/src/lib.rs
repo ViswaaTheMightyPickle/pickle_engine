@@ -1,8 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-pub const CHUNK_SIZE: i32 = 32;
+pub const CHUNK_SIZE: i32 = 16;
+pub const WORLD_SIZE_CHUNKS: i32 = 16;
 pub const CELLS_PER_METRE: f32 = 16.0;
 pub const STEP_SECONDS: f32 = 1.0 / 60.0;
+pub const WORLD_SIZE: i32 = 255;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct CellPos {
@@ -184,11 +186,8 @@ impl World {
     }
 
     pub fn is_in_world_boundaries(&self, pos: CellPos) -> bool {
-        if pos.x > 255 || pos.x < 0 || pos.y > 255 || pos.y < 0 {
-            return false;
-        } else {
-            return true;
-        }
+        let chunk = chunk_of(pos);
+        (0..WORLD_SIZE_CHUNKS).contains(&chunk.x) && (0..WORLD_SIZE_CHUNKS).contains(&chunk.y)
     }
 
     pub fn is_solid(&self, pos: CellPos) -> bool {
@@ -369,6 +368,28 @@ mod tests {
             world.set(pos, MaterialId::SAND);
             assert_eq!(world.get(pos), MaterialId::SAND);
         }
+    }
+
+    #[test]
+    fn movement_boundaries_are_defined_in_chunks() {
+        let world = World::new();
+        let last_cell = WORLD_SIZE_CHUNKS * CHUNK_SIZE - 1;
+
+        assert!(world.is_in_world_boundaries(CellPos { x: 0, y: 0 }));
+        assert!(world.is_in_world_boundaries(CellPos {
+            x: last_cell,
+            y: last_cell
+        }));
+        assert!(!world.is_in_world_boundaries(CellPos { x: -1, y: 0 }));
+        assert!(!world.is_in_world_boundaries(CellPos { x: 0, y: -1 }));
+        assert!(!world.is_in_world_boundaries(CellPos {
+            x: last_cell + 1,
+            y: 0
+        }));
+        assert!(!world.is_in_world_boundaries(CellPos {
+            x: 0,
+            y: last_cell + 1
+        }));
     }
 
     #[test]

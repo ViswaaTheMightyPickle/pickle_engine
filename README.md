@@ -31,7 +31,7 @@ The first milestone is deliberately small: place an imported object in a scene, 
 
 | Area | Status | What that means |
 | --- | --- | --- |
-| Core world | Basic sand simulation | Chunk storage, cell access, snapshots, and sand movement exist. Movement is currently restricted to coordinates `0..=255` on each axis. |
+| Core world | Basic sand simulation | Chunk storage, cell access, snapshots, and sand movement exist. Movement is currently restricted to an `8 x 8`-chunk area (cell coordinates `0..=255` on each axis). |
 | Physics | Rapier pipeline scaffold | The pipeline steps in a headless collision test, but spawning imported bodies, syncing transforms, and connecting terrain remain unfinished. |
 | Asset import | Interface only | The importer API exists, but PNG decoding and mask validation are still TODO. |
 | Editor | Basic viewport | Sand and stone cells render; mouse-based placement and imported-object workflows are still missing. |
@@ -104,7 +104,7 @@ On Windows, install the MSVC C++ build tools if requested by `rustup`.
 ## Near-term roadmap
 
 - [x] Implement downward and diagonal sand movement, with tests for conservation and positive chunk-boundary crossing.
-- [ ] Decide whether sand should move at negative coordinates; current movement is restricted to `0..=255`.
+- [ ] Decide whether sand should move at negative coordinates; current movement is restricted to an `8 x 8`-chunk area.
 - [ ] Add mouse-based sand and stone placement in the viewport.
 - [ ] Decode sprite, action-mask, and collision-mask PNGs.
 - [ ] Reject mismatched dimensions, unknown materials, partial alpha, and invalid collision colors.
