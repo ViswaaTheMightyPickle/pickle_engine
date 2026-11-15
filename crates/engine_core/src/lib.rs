@@ -224,12 +224,20 @@ impl World {
             y: pos.y + 1,
         };
 
-        let can_move_left =
-            self.is_in_world_boundaries(diagonal_l) && (self.get(diagonal_l) == MaterialId::EMPTY);
+        let can_move_left = self.is_in_world_boundaries(diagonal_l)
+            && self.get(diagonal_l) == MaterialId::EMPTY
+            && !self.is_solid(CellPos {
+                x: pos.x - 1,
+                y: pos.y,
+            });
         let can_move_down =
             self.is_in_world_boundaries(below) && (self.get(below) == MaterialId::EMPTY);
-        let can_move_right =
-            self.is_in_world_boundaries(diagonal_r) && (self.get(diagonal_r) == MaterialId::EMPTY);
+        let can_move_right = self.is_in_world_boundaries(diagonal_r)
+            && self.get(diagonal_r) == MaterialId::EMPTY
+            && !self.is_solid(CellPos {
+                x: pos.x + 1,
+                y: pos.y,
+            });
 
         CellState {
             move_state: [can_move_left, can_move_down, can_move_right],
@@ -403,6 +411,67 @@ mod tests {
         assert_eq!(world.get(CellPos { x: 5, y: 5 }), MaterialId::EMPTY);
 
         assert_eq!(world.get(CellPos { x: 5, y: 6 }), MaterialId::SAND);
+    }
+
+    #[test]
+    fn sand_cannot_move_diagonally_through_stone_walls() {
+        for direction in [-1, 1] {
+            let mut world = World::new();
+            let sand = CellPos { x: 32, y: 10 };
+            world.set(sand, MaterialId::SAND);
+            world.set(CellPos { x: 32, y: 11 }, MaterialId::STONE);
+            world.set(
+                CellPos {
+                    x: 32 + direction,
+                    y: 10,
+                },
+                MaterialId::STONE,
+            );
+            world.set(
+                CellPos {
+                    x: 32 - direction,
+                    y: 11,
+                },
+                MaterialId::STONE,
+            );
+
+            world.step();
+
+            assert_eq!(world.get(sand), MaterialId::SAND);
+            assert_eq!(
+                world.get(CellPos {
+                    x: 32 + direction,
+                    y: 11
+                }),
+                MaterialId::EMPTY
+            );
+        }
+    }
+
+    #[test]
+    fn sand_can_slide_diagonally_when_side_is_clear() {
+        for direction in [-1, 1] {
+            let mut world = World::new();
+            world.set(CellPos { x: 32, y: 10 }, MaterialId::SAND);
+            world.set(CellPos { x: 32, y: 11 }, MaterialId::STONE);
+            world.set(
+                CellPos {
+                    x: 32 - direction,
+                    y: 11,
+                },
+                MaterialId::STONE,
+            );
+
+            world.step();
+
+            assert_eq!(
+                world.get(CellPos {
+                    x: 32 + direction,
+                    y: 11
+                }),
+                MaterialId::SAND
+            );
+        }
     }
 
     #[test]
