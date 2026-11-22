@@ -1,3 +1,5 @@
+mod collision_importer;
+
 use eframe::egui;
 use engine_core::{CellPos, MaterialId, STEP_SECONDS, World};
 use engine_physics::PhysicsWorld;
