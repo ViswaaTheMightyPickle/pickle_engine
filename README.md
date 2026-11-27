@@ -86,8 +86,6 @@ cargo test --workspace
 cargo run -p engine_app
 ```
 
-One test, `negative_coordinates_use_floor_chunks`, currently fails: it expects chunk `y = -2` for cell `y = -33`, but with `16 x 16` chunks the result is `-3`.
-
 Before committing changes:
 
 ```sh

@@ -367,7 +367,7 @@ mod tests {
     fn negative_coordinates_use_floor_chunks() {
         assert_eq!(
             chunk_of(CellPos { x: -1, y: -33 }),
-            ChunkPos { x: -1, y: -2 }
+            ChunkPos { x: -1, y: -3 }
         );
     }
 
