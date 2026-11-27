@@ -1,8 +1,11 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+pub mod game_object;
+pub mod inspector;
+
 pub const CHUNK_SIZE: i32 = 16;
 pub const WORLD_SIZE_CHUNKS: i32 = 16;
-pub const CELLS_PER_METRE: f32 = 16.0;
+pub const CELLS_PER_METER: f32 = 16.0;
 pub const STEP_SECONDS: f32 = 1.0 / 60.0;
 pub const WORLD_SIZE: i32 = 255;
 
@@ -113,8 +116,8 @@ pub struct CellState {
 
 impl CellPos {
     pub fn to_physics_coordinates(self) -> PhysicsPos {
-        let phy_x = self.x as f32 / CELLS_PER_METRE;
-        let phy_y = self.y as f32 / CELLS_PER_METRE;
+        let phy_x = self.x as f32 / CELLS_PER_METER;
+        let phy_y = self.y as f32 / CELLS_PER_METER;
 
         PhysicsPos {
             x: (phy_x),
@@ -123,8 +126,8 @@ impl CellPos {
     }
 
     pub fn to_physics_center(self) -> PhysicsPos {
-        let phy_x = (self.x as f32 + 0.5) / CELLS_PER_METRE;
-        let phy_y = (self.y as f32 + 0.5) / CELLS_PER_METRE;
+        let phy_x = (self.x as f32 + 0.5) / CELLS_PER_METER;
+        let phy_y = (self.y as f32 + 0.5) / CELLS_PER_METER;
 
         PhysicsPos {
             x: (phy_x),
@@ -135,8 +138,8 @@ impl CellPos {
 
 impl PhysicsPos {
     pub fn to_cell_coordinates(self) -> CellPos {
-        let cell_x = (self.x * CELLS_PER_METRE).floor() as i32;
-        let cell_y = (self.y * CELLS_PER_METRE).floor() as i32;
+        let cell_x = (self.x * CELLS_PER_METER).floor() as i32;
+        let cell_y = (self.y * CELLS_PER_METER).floor() as i32;
 
         CellPos {
             x: (cell_x),

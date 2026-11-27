@@ -18,11 +18,13 @@ The first milestone is deliberately small: place an imported object in a scene, 
 
 - A four-crate Rust workspace with clean dependency boundaries.
 - Shared engine types for cells, chunks, materials, objects, transforms, commands, and view snapshots.
-- Sparse `32 x 32` world chunks stored in a `BTreeMap`.
+- Sparse `16 x 16` world chunks stored in a `BTreeMap`.
 - Correct chunk addressing for positive and negative world coordinates.
 - Reading and writing cells across chunk boundaries.
 - Sand movement down and diagonally, with active-chunk updates and tests for crossing a positive chunk boundary.
-- A read-only snapshot of visible world cells and a basic viewport that renders sand and stone.
+- A read-only snapshot of visible world cells and a basic viewport that renders sand and stone, with sand and stone brushes for mouse painting.
+- The foundation for the editor inspector: the `Inspectable` trait, editable field types (including `Vec` lists and object references), and `Transform` support.
+- A `GameObject` type with an ID, a name, and a component list that starts with a `Transform`.
 - A Rapier pipeline with a headless collision test, plus stable object IDs and placeholder physics state storage.
 - A native eframe window with Play/Pause, Reset, and a test button that places one sand cell.
 - Pinned Rapier, eframe, and image dependencies with a reproducible `Cargo.lock`.
@@ -31,10 +33,10 @@ The first milestone is deliberately small: place an imported object in a scene, 
 
 | Area | Status | What that means |
 | --- | --- | --- |
-| Core world | Basic sand simulation | Chunk storage, cell access, snapshots, and sand movement exist. Movement is currently restricted to an `8 x 8`-chunk area (cell coordinates `0..=255` on each axis). |
+| Core world | Basic sand simulation | Chunk storage, cell access, snapshots, and sand movement exist. Movement is currently restricted to a `16 x 16`-chunk area (cell coordinates `0..=255` on each axis). |
 | Physics | Rapier pipeline scaffold | The pipeline steps in a headless collision test, but spawning imported bodies, syncing transforms, and connecting terrain remain unfinished. |
 | Asset import | Interface only | The importer API exists, but PNG decoding and mask validation are still TODO. |
-| Editor | Basic viewport | Sand and stone cells render; mouse-based placement and imported-object workflows are still missing. |
+| Editor | Basic viewport; backend in progress | Sand and stone render and can be painted with the mouse. Inspector types and `GameObject` exist, but the editor backend, editor panels, and imported-object workflows are still missing. |
 | Integration | Partial | The app steps the world and physics pipeline, but the first playable demonstration does not exist yet. |
 
 In short: the skeleton is healthy, the organs are labelled, and now the creature needs to be brought to life.
@@ -55,7 +57,7 @@ Pixel erasing, regenerated colliders, disconnected-piece splitting, liquids, gas
 
 ```text
 crates/
-├── engine_core/      shared types and chunked cellular world
+├── engine_core/      shared types, game objects, inspector, and chunked cellular world
 ├── engine_physics/   Rapier adapter and rigid-body state
 ├── engine_assets/    sprite and mask import pipeline
 └── engine_app/       native editor and simulation orchestration
@@ -66,7 +68,7 @@ Dependencies flow toward `engine_core`. The core crate stays independent of Rapi
 ## Simulation rules and targets
 
 - **Coordinates:** +X points right and +Y points down.
-- **Chunks:** each chunk contains `32 x 32` cells.
+- **Chunks:** each chunk contains `16 x 16` cells.
 - **Storage:** cell arrays are row-major.
 - **Scale:** 16 simulation cells equal one metre in the physics world.
 - **Timestep:** the target is fixed 60 Hz. Rapier is configured with a 60 Hz timestep, but the app currently steps on each UI update rather than scheduling fixed-rate updates.
@@ -83,6 +85,8 @@ cargo check --workspace
 cargo test --workspace
 cargo run -p engine_app
 ```
+
+One test, `negative_coordinates_use_floor_chunks`, currently fails: it expects chunk `y = -2` for cell `y = -33`, but with `16 x 16` chunks the result is `-3`.
 
 Before committing changes:
 
@@ -104,8 +108,10 @@ On Windows, install the MSVC C++ build tools if requested by `rustup`.
 ## Near-term roadmap
 
 - [x] Implement downward and diagonal sand movement, with tests for conservation and positive chunk-boundary crossing.
-- [ ] Decide whether sand should move at negative coordinates; current movement is restricted to an `8 x 8`-chunk area.
-- [ ] Add mouse-based sand and stone placement in the viewport.
+- [ ] Decide whether sand should move at negative coordinates; current movement is restricted to a `16 x 16`-chunk area.
+- [x] Add mouse-based sand and stone placement in the viewport.
+- [x] Add inspector field types and the `GameObject` type.
+- [ ] Add the `EditorBackend` trait and connect it to the editor app.
 - [ ] Decode sprite, action-mask, and collision-mask PNGs.
 - [ ] Reject mismatched dimensions, unknown materials, partial alpha, and invalid collision colors.
 - [x] Step Rapier in a headless test with a body and floor collider.
