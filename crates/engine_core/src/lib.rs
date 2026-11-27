@@ -278,12 +278,13 @@ impl World {
             None
         };
 
-        if let Some(new_position) = destination {
-            if self.get(position) == MaterialId::SAND && self.get(new_position) == MaterialId::EMPTY
-            {
-                self.set(position, MaterialId::EMPTY);
-                self.set(new_position, MaterialId::SAND);
-            }
+        if let Some(new_position) = destination
+            && self.get(position) == MaterialId::SAND
+            && self.get(new_position) == MaterialId::EMPTY
+        {
+            self.set(position, MaterialId::EMPTY);
+            self.set(new_position, MaterialId::SAND);
+            return Some(new_position);
         }
         None
     }
@@ -291,7 +292,7 @@ impl World {
     pub fn step(&mut self) {
         let mut cells = self.sand_cells();
         let mut moved_positions = BTreeSet::<CellPos>::new();
-        cells.sort_by(|a, b| b.pos.y.cmp(&a.pos.y));
+        cells.sort_by_key(|cell| std::cmp::Reverse(cell.pos.y));
 
         self.active_chunks.clear();
 

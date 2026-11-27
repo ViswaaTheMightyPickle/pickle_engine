@@ -50,25 +50,23 @@ impl eframe::App for EngineApp {
                 let mouse_down = ui.input(|i| i.pointer.button_down(egui::PointerButton::Primary));
 
                 // Only paint if LMB is held AND a brush is selected
-                if mouse_down {
-                    if let Some(material) = self.brush {
-                        // Convert global mouse position to viewport coordinates
-                        let mouse_x = mouse_pos.x - rect.left();
-                        let mouse_y = mouse_pos.y - rect.top();
+                if mouse_down && let Some(material) = self.brush {
+                    // Convert global mouse position to viewport coordinates
+                    let mouse_x = mouse_pos.x - rect.left();
+                    let mouse_y = mouse_pos.y - rect.top();
 
-                        // Convert pixel coordinates to grid coordinates
-                        let cell_x = (mouse_x / cell_size).floor() as i32;
-                        let cell_y = (mouse_y / cell_size).floor() as i32;
+                    // Convert pixel coordinates to grid coordinates
+                    let cell_x = (mouse_x / cell_size).floor() as i32;
+                    let cell_y = (mouse_y / cell_size).floor() as i32;
 
-                        // Place selected material
-                        self.world.set(
-                            CellPos {
-                                x: cell_x,
-                                y: cell_y,
-                            },
-                            material,
-                        );
-                    }
+                    // Place selected material
+                    self.world.set(
+                        CellPos {
+                            x: cell_x,
+                            y: cell_y,
+                        },
+                        material,
+                    );
                 }
             }
 

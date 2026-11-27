@@ -2,6 +2,9 @@ use crate::{ObjectId, Transform};
 
 pub trait InspectableList {
     fn len(&self) -> usize;
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
     fn item_mut(&mut self, index: usize) -> Option<FieldValue<'_>>;
     fn add(&mut self);
     fn remove(&mut self, index: usize);

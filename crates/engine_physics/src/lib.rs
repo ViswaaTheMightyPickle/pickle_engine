@@ -22,9 +22,11 @@ pub struct PhysicsWorld {
 
 impl PhysicsWorld {
     pub fn new() -> Self {
-        let mut integration_parameters = IntegrationParameters::default();
         //timestep length 60fps, i assume ts is what you mean by 60hz
-        integration_parameters.dt = STEP_SECONDS;
+        let integration_parameters = IntegrationParameters {
+            dt: STEP_SECONDS,
+            ..Default::default()
+        };
         Self {
             rigid_body_set: RigidBodySet::new(),
             collider_set: ColliderSet::new(),
